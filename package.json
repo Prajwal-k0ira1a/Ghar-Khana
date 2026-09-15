@@ -1,0 +1,24 @@
+{
+  "name": "gharkhana-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Recurring home-cooked meal subscriptions for workplaces and everyday life",
+  "scripts": {
+    "dev": "pnpm --filter @gharkhana/backend dev",
+    "dev:backend": "pnpm --filter @gharkhana/backend dev",
+    "dev:mobile": "pnpm --filter @gharkhana/mobile dev",
+    "build": "pnpm -r --filter \"@gharkhana/*\" build",
+    "typecheck": "pnpm -r --filter \"@gharkhana/*\" typecheck",
+    "test": "pnpm -r --filter \"@gharkhana/*\" test",
+    "db:generate": "pnpm --filter @gharkhana/backend db:generate",
+    "db:migrate": "pnpm --filter @gharkhana/backend db:migrate",
+    "db:seed": "pnpm --filter @gharkhana/backend db:seed"
+  },
+  "devDependencies": {
+    "metro-runtime": "0.83.3",
+    "typescript": "^5.7.3"
+  },
+  "dependencies": {
+    "query-string": "^7.1.3"
+  }
+}
