@@ -6,20 +6,28 @@ import {
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
+  TextInput,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { providersApi, type ProviderListItem } from '../../src/api/providers';
-import { Input } from '../../src/components/ui/Input';
-import { Colors, Spacing, Typography } from '../../src/theme/tokens';
-import { Search } from 'lucide-react-native';
+import { Colors } from '../../src/theme/tokens';
+import {
+  Search,
+  Star,
+  MapPin,
+  Check,
+  ChevronRight,
+  Flame,
+  Sparkles,
+} from 'lucide-react-native';
 
 const FALLBACK_PROVIDERS: ProviderListItem[] = [
   {
     id: 'prov_1',
     userId: 'usr_hira',
     displayName: "Hira's Home Kitchen",
-    description: 'Authentic Dal Bhat, Newari Thali & freshly steamed dumplings.',
+    description: 'Authentic Dal Bhat, Newari Thali & freshly steamed local dumplings.',
     providerType: 'HOME_COOK',
     verificationStatus: 'VERIFIED',
     status: 'ACTIVE',
@@ -36,7 +44,7 @@ const FALLBACK_PROVIDERS: ProviderListItem[] = [
     id: 'prov_2',
     userId: 'usr_sushila',
     displayName: 'Sushila Aama ko Rasoi',
-    description: 'Organic village ghee, pure vegetarian dal bhat, and roti tarkari.',
+    description: 'Organic village ghee, pure vegetarian dal bhat, and soft roti tarkari.',
     providerType: 'HOUSEHOLD',
     verificationStatus: 'VERIFIED',
     status: 'ACTIVE',
@@ -53,7 +61,7 @@ const FALLBACK_PROVIDERS: ProviderListItem[] = [
     id: 'prov_3',
     userId: 'usr_balkumari',
     displayName: 'Balkumari Healthy Tiffin',
-    description: 'Low-oil, balanced nutrition tailored for office workers.',
+    description: 'Low-oil, balanced nutrition tailored for busy office workers.',
     providerType: 'SMALL_HOME_KITCHEN',
     verificationStatus: 'VERIFIED',
     status: 'ACTIVE',
@@ -110,91 +118,161 @@ export default function DiscoverScreen() {
   const getStartingPrice = (provId: string) => {
     switch (provId) {
       case 'prov_2':
-        return 'From NPR 170 / meal';
+        return 'NPR 170';
       case 'prov_3':
-        return 'From NPR 190 / meal';
+        return 'NPR 190';
       default:
-        return 'From NPR 180 / meal';
+        return 'NPR 180';
     }
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView
+      style={styles.screen}
+      contentContainerStyle={styles.scrollContent}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* ── Header ── */}
       <View style={styles.header}>
-        <Text style={styles.title}>Home Kitchens</Text>
+        <Text style={styles.title}>Neighborhood Kitchens</Text>
         <Text style={styles.subtitle}>
-          Verified household cooks preparing small-batch daily meals near you.
+          Subscribe to passionate home cooks preparing fresh daily tiffins near you.
         </Text>
       </View>
 
-      {/* Search Input */}
-      <View style={styles.searchSection}>
-        <Input
-          leftIcon={<Search color={Colors.textMuted} size={16} />}
-          onChangeText={setSearchQuery}
-          placeholder="Search by neighborhood or kitchen name"
+      {/* ── Pinterest Pill Search Input ── */}
+      <View style={styles.searchContainer}>
+        <Search size={18} color="#94A3B8" />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search by neighborhood, cuisine, or cook..."
+          placeholderTextColor="#94A3B8"
           value={searchQuery}
+          onChangeText={setSearchQuery}
         />
       </View>
 
-      {/* Filter Tabs */}
-      <View style={styles.filtersContainer}>
-        {(
-          [
-            ['ALL', 'All'],
-            ['LUNCH', 'Lunch'],
-            ['DINNER', 'Dinner'],
-            ['VEG', 'Vegetarian'],
-          ] as const
-        ).map(([key, label]) => {
-          const isActive = selectedFilter === key;
-          return (
-            <TouchableOpacity
-              key={key}
-              onPress={() => setSelectedFilter(key)}
-              style={[
-                styles.filterTab,
-                isActive && styles.filterTabActive,
-              ]}
-              activeOpacity={0.7}
-            >
-              <Text
+      {/* ── Filter Pills (Pinterest Ribbon) ── */}
+      <View style={styles.filterRibbonContainer}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.filterRibbonScroll}
+        >
+          {(
+            [
+              ['ALL', 'All Kitchens'],
+              ['LUNCH', 'Lunch Tiffin'],
+              ['DINNER', 'Dinner Tiffin'],
+              ['VEG', 'Pure Vegetarian'],
+            ] as const
+          ).map(([key, label]) => {
+            const isActive = selectedFilter === key;
+            return (
+              <TouchableOpacity
+                key={key}
+                onPress={() => setSelectedFilter(key)}
                 style={[
-                  styles.filterTabText,
-                  isActive && styles.filterTabTextActive,
+                  styles.filterPill,
+                  isActive && styles.filterPillActive,
                 ]}
+                activeOpacity={0.8}
               >
-                {label}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
+                <Text
+                  style={[
+                    styles.filterPillText,
+                    isActive && styles.filterPillTextActive,
+                  ]}
+                >
+                  {label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
       </View>
 
-      {/* Provider List (1 primary + 2 supporting lines per item) */}
+      {/* ── Provider Cards (Pinterest Kitchen Showcase) ── */}
       {isLoading ? (
-        <ActivityIndicator color={Colors.primary} size="small" style={{ marginTop: Spacing.xl }} />
+        <ActivityIndicator color={Colors.primary} size="small" style={{ marginTop: 32 }} />
       ) : (
-        <View style={styles.listContainer}>
-          {providers.map((provider, idx, arr) => (
+        <View style={styles.kitchenList}>
+          {providers.map((provider) => (
             <TouchableOpacity
               key={provider.id}
-              activeOpacity={0.6}
+              activeOpacity={0.85}
               onPress={() => handleProviderPress(provider)}
-              style={[
-                styles.providerRow,
-                idx < arr.length - 1 && styles.providerRowBorder,
-              ]}
+              style={styles.kitchenCard}
             >
-              <Text style={styles.displayName}>{provider.displayName}</Text>
+              {/* Card Header Row */}
+              <View style={styles.cardTopRow}>
+                <View style={styles.avatarRow}>
+                  <View style={styles.kitchenAvatar}>
+                    <Text style={styles.kitchenAvatarLetter}>
+                      {provider.displayName.charAt(0)}
+                    </Text>
+                  </View>
+                  <View>
+                    <View style={styles.nameWithBadge}>
+                      <Text style={styles.kitchenName}>{provider.displayName}</Text>
+                      <View style={styles.verifiedBadge}>
+                        <Check size={9} color="#FFFFFF" strokeWidth={3} />
+                      </View>
+                    </View>
+                    <Text style={styles.kitchenTypeSub}>
+                      {provider.providerType === 'HOUSEHOLD'
+                        ? 'Household Cook'
+                        : 'Authentic Home Kitchen'}
+                    </Text>
+                  </View>
+                </View>
 
-              <Text style={styles.typeDistanceLine}>
-                {provider.providerType === 'HOUSEHOLD' ? 'Household kitchen' : 'Home kitchen'} · {provider.distance || '1.5 km away'}
+                {/* Rating Badge */}
+                <View style={styles.ratingBadge}>
+                  <Star size={11} color="#F59E0B" fill="#F59E0B" />
+                  <Text style={styles.ratingText}>
+                    {provider.rating || 4.8}
+                  </Text>
+                </View>
+              </View>
+
+              {/* Specialty & Description */}
+              <Text style={styles.kitchenDesc} numberOfLines={2}>
+                {provider.description}
               </Text>
 
-              <Text style={styles.priceRatingLine}>
-                {getStartingPrice(provider.id)} · {provider.rating || 4.8} rating
-              </Text>
+              {/* Tag Badges */}
+              <View style={styles.tagChipsRow}>
+                <View style={styles.tagChip}>
+                  <MapPin size={11} color="#64748B" />
+                  <Text style={styles.tagChipText}>
+                    {provider.distance || '1.5 km away'}
+                  </Text>
+                </View>
+
+                <View style={styles.tagChip}>
+                  <Flame size={11} color={Colors.primary} />
+                  <Text style={styles.tagChipText}>
+                    {provider.dailyCapacity?.LUNCH || 40} meals daily cap
+                  </Text>
+                </View>
+              </View>
+
+              {/* Card Footer with Price & CTA */}
+              <View style={styles.cardFooter}>
+                <View>
+                  <Text style={styles.priceLabel}>Starting from</Text>
+                  <Text style={styles.priceValue}>
+                    {getStartingPrice(provider.id)}{' '}
+                    <Text style={styles.priceUnit}>/ meal</Text>
+                  </Text>
+                </View>
+
+                <View style={styles.viewMenuBtn}>
+                  <Text style={styles.viewMenuBtnText}>View Menu</Text>
+                  <ChevronRight size={14} color="#FFFFFF" strokeWidth={2.5} />
+                </View>
+              </View>
             </TouchableOpacity>
           ))}
         </View>
@@ -204,80 +282,242 @@ export default function DiscoverScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: '#F8FAFC',
   },
-  content: {
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.xl + 4,
-    paddingBottom: Spacing.xxl,
+  scrollContent: {
+    paddingHorizontal: 20,
+    paddingTop: 48,
+    paddingBottom: 40,
+    maxWidth: 520,
+    width: '100%',
+    alignSelf: 'center',
   },
+
+  // ── Header ──
   header: {
-    marginBottom: Spacing.md,
+    marginBottom: 20,
   },
   title: {
-    ...Typography.title,
     fontSize: 24,
+    fontWeight: '800',
+    color: '#0F172A',
+    letterSpacing: -0.4,
     marginBottom: 4,
   },
   subtitle: {
-    ...Typography.body,
-    color: Colors.textSecondary,
-    fontSize: 14,
+    fontSize: 13,
+    color: '#64748B',
+    lineHeight: 18,
   },
-  searchSection: {
-    marginBottom: Spacing.xs,
-  },
-  filtersContainer: {
+
+  // ── Pill Search ──
+  searchContainer: {
     flexDirection: 'row',
-    gap: Spacing.xs,
-    marginBottom: Spacing.md,
+    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+    marginBottom: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.03,
+    shadowRadius: 6,
+    elevation: 2,
+    gap: 10,
   },
-  filterTab: {
-    paddingHorizontal: Spacing.md,
-    paddingVertical: 6,
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
+  searchInput: {
+    flex: 1,
+    fontSize: 14,
+    color: '#0F172A',
+    padding: 0,
   },
-  filterTabActive: {
-    borderBottomColor: Colors.textPrimary,
+
+  // ── Filter Ribbon ──
+  filterRibbonContainer: {
+    marginBottom: 20,
+    marginHorizontal: -20,
   },
-  filterTabText: {
-    ...Typography.caption,
-    color: Colors.textMuted,
+  filterRibbonScroll: {
+    paddingHorizontal: 20,
+    gap: 8,
+  },
+  filterPill: {
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+    borderRadius: 18,
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#E2E8F0',
+  },
+  filterPillActive: {
+    backgroundColor: Colors.primary,
+    borderColor: Colors.primary,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    elevation: 3,
+  },
+  filterPillText: {
+    fontSize: 12,
     fontWeight: '600',
-    fontSize: 13,
+    color: '#64748B',
   },
-  filterTabTextActive: {
-    color: Colors.textPrimary,
+  filterPillTextActive: {
+    color: '#FFFFFF',
+    fontWeight: '700',
   },
-  listContainer: {
-    borderTopWidth: 1,
-    borderTopColor: Colors.surfaceBorder,
+
+  // ── Kitchen Cards ──
+  kitchenList: {
+    gap: 16,
   },
-  providerRow: {
-    paddingVertical: Spacing.md + 2,
+  kitchenCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 22,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.04,
+    shadowRadius: 10,
+    elevation: 2,
   },
-  providerRowBorder: {
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.surfaceBorder,
+  cardTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    marginBottom: 10,
   },
-  displayName: {
-    ...Typography.subtitle,
+  avatarRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  kitchenAvatar: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#FFF7ED',
+    borderWidth: 1,
+    borderColor: '#FED7AA',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  kitchenAvatarLetter: {
     fontSize: 16,
-    color: Colors.textPrimary,
-    marginBottom: 2,
+    fontWeight: '800',
+    color: Colors.primary,
   },
-  typeDistanceLine: {
-    ...Typography.body,
-    fontSize: 13,
-    color: Colors.textSecondary,
-    marginBottom: 2,
+  nameWithBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
   },
-  priceRatingLine: {
-    ...Typography.caption,
+  kitchenName: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#0F172A',
+  },
+  verifiedBadge: {
+    width: 13,
+    height: 13,
+    borderRadius: 6.5,
+    backgroundColor: Colors.secondary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  kitchenTypeSub: {
+    fontSize: 11,
+    color: '#64748B',
+    marginTop: 1,
+  },
+  ratingBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#FEF3C7',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 10,
+  },
+  ratingText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#92400E',
+  },
+
+  kitchenDesc: {
     fontSize: 13,
-    color: Colors.textMuted,
+    color: '#475569',
+    lineHeight: 18,
+    marginBottom: 12,
+  },
+
+  tagChipsRow: {
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 16,
+  },
+  tagChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: '#F8FAFC',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#F1F5F9',
+  },
+  tagChipText: {
+    fontSize: 11,
+    color: '#64748B',
+    fontWeight: '500',
+  },
+
+  cardFooter: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#F1F5F9',
+  },
+  priceLabel: {
+    fontSize: 10,
+    color: '#94A3B8',
+    fontWeight: '500',
+  },
+  priceValue: {
+    fontSize: 15,
+    fontWeight: '800',
+    color: Colors.primary,
+  },
+  priceUnit: {
+    fontSize: 11,
+    fontWeight: '500',
+    color: '#64748B',
+  },
+
+  viewMenuBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: Colors.primary,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 14,
+  },
+  viewMenuBtnText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
 });

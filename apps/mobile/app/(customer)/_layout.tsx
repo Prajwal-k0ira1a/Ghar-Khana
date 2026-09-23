@@ -7,30 +7,36 @@ import { Colors } from "../../src/theme/tokens";
 
 export default function CustomerTabsLayout() {
   const insets = useSafeAreaInsets();
-  // Lift navbar comfortably above Android 3-button navigation shortcuts or iOS home bar
   const bottomPadding =
     insets.bottom > 0
       ? insets.bottom + (Platform.OS === "android" ? 6 : 2)
-      : 10;
-  const tabHeight = 54 + bottomPadding;
+      : 12;
+  const tabHeight = 56 + bottomPadding;
 
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarStyle: {
-          backgroundColor: Colors.surfaceDark,
-          borderTopColor: Colors.surfaceBorderDark,
+          backgroundColor: '#FFFFFF',
+          borderTopColor: '#F1F5F9',
+          borderTopWidth: 1,
           height: tabHeight,
           paddingBottom: bottomPadding,
-          paddingTop: 6,
+          paddingTop: 8,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: -3 },
+          shadowOpacity: 0.03,
+          shadowRadius: 8,
+          elevation: 5,
         },
         tabBarActiveTintColor: Colors.primary,
-        tabBarInactiveTintColor: Colors.textMutedDark,
+        tabBarInactiveTintColor: '#94A3B8',
         tabBarLabelStyle: {
           fontSize: 11,
-          fontWeight: "500",
-          marginTop: -2,
+          fontWeight: '600',
+          letterSpacing: 0.2,
+          marginTop: -1,
         },
       }}
     >
@@ -38,35 +44,45 @@ export default function CustomerTabsLayout() {
         name="home"
         options={{
           title: "Home",
-          tabBarIcon: ({ color }) => <Home color={color} size={20} strokeWidth={1.8} />,
+          tabBarIcon: ({ color, focused }) => (
+            <Home color={color} size={21} strokeWidth={focused ? 2.4 : 1.8} />
+          ),
         }}
       />
       <Tabs.Screen
         name="discover"
         options={{
           title: "Discover",
-          tabBarIcon: ({ color }) => <Compass color={color} size={20} strokeWidth={1.8} />,
+          tabBarIcon: ({ color, focused }) => (
+            <Compass color={color} size={21} strokeWidth={focused ? 2.4 : 1.8} />
+          ),
         }}
       />
       <Tabs.Screen
         name="calendar"
         options={{
           title: "My Meals",
-          tabBarIcon: ({ color }) => <Calendar color={color} size={20} strokeWidth={1.8} />,
+          tabBarIcon: ({ color, focused }) => (
+            <Calendar color={color} size={21} strokeWidth={focused ? 2.4 : 1.8} />
+          ),
         }}
       />
       <Tabs.Screen
         name="notifications"
         options={{
           title: "Alerts",
-          tabBarIcon: ({ color }) => <Bell color={color} size={20} strokeWidth={1.8} />,
+          tabBarIcon: ({ color, focused }) => (
+            <Bell color={color} size={21} strokeWidth={focused ? 2.4 : 1.8} />
+          ),
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: "Profile",
-          tabBarIcon: ({ color }) => <User color={color} size={20} strokeWidth={1.8} />,
+          tabBarIcon: ({ color, focused }) => (
+            <User color={color} size={21} strokeWidth={focused ? 2.4 : 1.8} />
+          ),
         }}
       />
     </Tabs>
