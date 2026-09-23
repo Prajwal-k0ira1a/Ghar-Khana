@@ -7,13 +7,17 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Image,
+  TextInput,
+  ActivityIndicator,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useAuthStore } from '../../src/stores/authStore';
-import { Button } from '../../src/components/ui/Button';
-import { Input } from '../../src/components/ui/Input';
-import { Colors, Spacing, BorderRadius, Typography } from '../../src/theme/tokens';
-import { ArrowRight, AlertCircle } from 'lucide-react-native';
+import { Colors } from '../../src/theme/tokens';
+import { AlertCircle, Eye, EyeOff } from 'lucide-react-native';
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const loginIllustration = require('../../assets/splash/login_illustration.jpg');
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -21,6 +25,8 @@ export default function LoginScreen() {
 
   const [loginInput, setLoginInput] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [focusedField, setFocusedField] = useState<string | null>(null);
   const [localError, setLocalError] = useState('');
 
   const handleLogin = async () => {
@@ -53,203 +59,347 @@ export default function LoginScreen() {
     }
   };
 
-  const fillDemoCustomer = () => {
-    setLoginInput('customer@gharkhana.app');
-    setPassword('Password123!');
-    setLocalError('');
-    clearError();
-  };
-
-  const fillDemoProvider = () => {
-    setLoginInput('provider@gharkhana.app');
-    setPassword('Password123!');
-    setLocalError('');
-    clearError();
-  };
-
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      style={styles.container}
-    >
-      <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-        <View style={styles.header}>
-          <Text style={styles.brandTitle}>घरखाना</Text>
-          <Text style={styles.title}>Sign In to GharKhana</Text>
-          <Text style={styles.subtitle}>
-            Access your recurring household meal subscriptions and daily schedule.
-          </Text>
-        </View>
+    <View style={styles.screen}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        style={styles.flex1}
+      >
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {/* ── Top Artistic Illustration Area ── */}
+          <View style={styles.topArtArea}>
+            <View style={styles.circleTopLeft} />
 
-        {(error || localError) ? (
-          <View style={styles.errorBox}>
-            <AlertCircle color={Colors.danger} size={15} />
-            <Text style={styles.errorText}>{localError || error}</Text>
+            <Image
+              source={loginIllustration}
+              style={styles.illustration}
+              resizeMode="contain"
+            />
+
+            <View style={styles.circleMidRight} />
           </View>
-        ) : null}
 
-        <View style={styles.form}>
-          <Input
-            autoCapitalize="none"
-            keyboardType="email-address"
-            label="Email or Mobile Phone"
-            onChangeText={(text) => {
-              setLoginInput(text);
-              setLocalError('');
-            }}
-            placeholder="e.g. customer@gharkhana.app or 9800000001"
-            value={loginInput}
-          />
+          {/* ── Main Form Container ── */}
+          <View style={styles.formContainer}>
+            {/* Centered Typography */}
+            <Text style={styles.title}>Welcome back</Text>
+            <Text style={styles.subtitle}>Sign in to your meal subscription</Text>
 
-          <Input
-            label="Password"
-            onChangeText={(text) => {
-              setPassword(text);
-              setLocalError('');
-            }}
-            placeholder="Enter your password"
-            secureTextEntry
-            value={password}
-          />
+            {/* Error Message */}
+            {(error || localError) ? (
+              <View style={styles.errorBox}>
+                <AlertCircle color={Colors.danger} size={15} />
+                <Text style={styles.errorText}>{localError || error}</Text>
+              </View>
+            ) : null}
 
-          <Button
-            loading={isLoading}
-            onPress={handleLogin}
-            size="lg"
-            style={styles.loginButton}
-            title="Sign In"
-            rightIcon={<ArrowRight color="#FFFFFF" size={16} />}
-          />
-
-          <View style={styles.demoBox}>
-            <Text style={styles.demoTitle}>QUICK DEMO ACCOUNTS</Text>
-            <View style={styles.demoButtons}>
-              <TouchableOpacity
-                onPress={fillDemoCustomer}
-                style={styles.demoChip}
-                activeOpacity={0.7}
+            {/* ── Minimal Underline Input Fields ── */}
+            {/* Email or Phone */}
+            <View style={styles.fieldGroup}>
+              <Text
+                style={[
+                  styles.floatingLabel,
+                  (focusedField === 'login' || loginInput.length > 0) &&
+                    styles.floatingLabelVisible,
+                  focusedField === 'login' && styles.floatingLabelFocused,
+                ]}
               >
-                <Text style={styles.demoChipText}>Customer Demo</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={fillDemoProvider}
-                style={styles.demoChip}
-                activeOpacity={0.7}
+                Email or Phone
+              </Text>
+              <View style={styles.inputRow}>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder={
+                    focusedField === 'login' || loginInput.length > 0
+                      ? ''
+                      : 'Email or Phone'
+                  }
+                  placeholderTextColor="#9CA3AF"
+                  value={loginInput}
+                  onChangeText={(text) => {
+                    setLoginInput(text);
+                    setLocalError('');
+                  }}
+                  autoCapitalize="none"
+                  keyboardType="email-address"
+                  onFocus={() => setFocusedField('login')}
+                  onBlur={() => setFocusedField(null)}
+                />
+              </View>
+              <View
+                style={[
+                  styles.underline,
+                  focusedField === 'login' && styles.underlineFocused,
+                ]}
+              />
+            </View>
+
+            {/* Password */}
+            <View style={styles.fieldGroup}>
+              <Text
+                style={[
+                  styles.floatingLabel,
+                  (focusedField === 'password' || password.length > 0) &&
+                    styles.floatingLabelVisible,
+                  focusedField === 'password' && styles.floatingLabelFocused,
+                ]}
               >
-                <Text style={styles.demoChipText}>Kitchen Provider Demo</Text>
+                Password
+              </Text>
+              <View style={styles.inputRow}>
+                <TextInput
+                  style={styles.textInput}
+                  placeholder={
+                    focusedField === 'password' || password.length > 0
+                      ? ''
+                      : 'Password'
+                  }
+                  placeholderTextColor="#9CA3AF"
+                  value={password}
+                  onChangeText={(text) => {
+                    setPassword(text);
+                    setLocalError('');
+                  }}
+                  secureTextEntry={!showPassword}
+                  autoCapitalize="none"
+                  onFocus={() => setFocusedField('password')}
+                  onBlur={() => setFocusedField(null)}
+                />
+                <TouchableOpacity
+                  onPress={() => setShowPassword(!showPassword)}
+                  style={styles.eyeButton}
+                  activeOpacity={0.7}
+                  hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                >
+                  {showPassword ? (
+                    <EyeOff size={18} color="#9CA3AF" />
+                  ) : (
+                    <Eye size={18} color="#9CA3AF" />
+                  )}
+                </TouchableOpacity>
+              </View>
+              <View
+                style={[
+                  styles.underline,
+                  focusedField === 'password' && styles.underlineFocused,
+                ]}
+              />
+            </View>
+
+            {/* ── Log in CTA (Pill Button in Saffron) ── */}
+            <TouchableOpacity
+              style={[
+                styles.submitButton,
+                isLoading && styles.submitButtonDisabled,
+              ]}
+              onPress={handleLogin}
+              disabled={isLoading}
+              activeOpacity={0.85}
+            >
+              {isLoading ? (
+                <ActivityIndicator color="#FFFFFF" size="small" />
+              ) : (
+                <Text style={styles.submitButtonText}>Log in</Text>
+              )}
+            </TouchableOpacity>
+
+            {/* ── Footer ── */}
+            <View style={styles.footer}>
+              <Text style={styles.footerText}>Don't have an account? </Text>
+              <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
+                <Text style={styles.footerLink}>Sign Up</Text>
               </TouchableOpacity>
             </View>
           </View>
-
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>Need a new account? </Text>
-            <TouchableOpacity onPress={() => router.push('/(auth)/register')}>
-              <Text style={styles.signupLink}>Sign Up</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screen: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: '#FFFFFF',
+  },
+  flex1: {
+    flex: 1,
   },
   scrollContent: {
     flexGrow: 1,
+  },
+
+  // ── Top Artistic Area ──
+  topArtArea: {
+    height: 180,
+    alignItems: 'center',
     justifyContent: 'center',
-    padding: Spacing.lg,
+    position: 'relative',
+    marginTop: 8,
+    maxWidth: 440,
+    width: '100%',
+    alignSelf: 'center',
   },
-  header: {
-    marginBottom: Spacing.lg,
+  illustration: {
+    width: 220,
+    height: 160,
   },
-  brandTitle: {
-    fontSize: 24,
-    fontWeight: '800',
-    color: Colors.primary,
-    marginBottom: 4,
+  circleTopLeft: {
+    position: 'absolute',
+    top: 24,
+    left: 28,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 1.8,
+    borderColor: '#FED7AA',
+    backgroundColor: '#FFF7ED',
   },
+  circleMidRight: {
+    position: 'absolute',
+    top: 90,
+    right: 28,
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    borderWidth: 1.8,
+    borderColor: '#FED7AA',
+    backgroundColor: '#FFF7ED',
+  },
+
+  // ── Main Form Container ──
+  formContainer: {
+    paddingHorizontal: 36,
+    paddingTop: 8,
+    paddingBottom: 40,
+    maxWidth: 440,
+    width: '100%',
+    alignSelf: 'center',
+  },
+
+  // Centered Typography
   title: {
-    ...Typography.title,
-    fontSize: 24,
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#1A1A1A',
+    textAlign: 'center',
+    letterSpacing: -0.5,
     marginBottom: 4,
   },
   subtitle: {
-    ...Typography.body,
-    color: Colors.textSecondary,
-    lineHeight: 20,
+    fontSize: 13,
+    color: '#9CA3AF',
+    textAlign: 'center',
+    marginBottom: 28,
   },
+
+  // Error Alert
   errorBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
     backgroundColor: '#FEF2F2',
     borderWidth: 1,
     borderColor: '#FECACA',
-    borderRadius: BorderRadius.xs,
-    padding: Spacing.sm,
-    marginBottom: Spacing.md,
+    borderRadius: 10,
+    padding: 10,
+    marginBottom: 18,
   },
   errorText: {
-    ...Typography.caption,
+    fontSize: 12,
     color: Colors.danger,
     fontWeight: '500',
-  },
-  form: {
-    marginTop: Spacing.xs,
-  },
-  loginButton: {
-    marginTop: Spacing.sm,
-  },
-  demoBox: {
-    marginTop: Spacing.xl,
-    padding: Spacing.md,
-    backgroundColor: Colors.surface,
-    borderRadius: BorderRadius.sm,
-    borderWidth: 1,
-    borderColor: Colors.surfaceBorder,
-  },
-  demoTitle: {
-    ...Typography.sectionHeader,
-    fontSize: 10,
-    marginBottom: Spacing.xs + 2,
-  },
-  demoButtons: {
-    flexDirection: 'row',
-    gap: Spacing.sm,
-  },
-  demoChip: {
     flex: 1,
-    paddingVertical: 10,
-    backgroundColor: Colors.surfaceSubtle,
-    borderRadius: BorderRadius.xs,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: Colors.surfaceBorder,
   },
-  demoChipText: {
-    ...Typography.caption,
+
+  // ── Underline Input Fields ──
+  fieldGroup: {
+    marginBottom: 20,
+  },
+  floatingLabel: {
+    fontSize: 11,
+    color: '#9CA3AF',
+    fontWeight: '500',
+    marginBottom: 2,
+    opacity: 0,
+    height: 14,
+  },
+  floatingLabelVisible: {
+    opacity: 1,
+  },
+  floatingLabelFocused: {
+    color: Colors.primary,
     fontWeight: '600',
-    color: Colors.textPrimary,
   },
+  inputRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 2,
+  },
+  textInput: {
+    flex: 1,
+    fontSize: 15,
+    color: '#1A1A1A',
+    paddingVertical: 6,
+    paddingHorizontal: 0,
+  },
+  eyeButton: {
+    padding: 4,
+  },
+  underline: {
+    height: 1.2,
+    backgroundColor: '#E5E7EB',
+    marginTop: 4,
+  },
+  underlineFocused: {
+    height: 2,
+    backgroundColor: Colors.primary,
+  },
+
+  // ── Sign Up CTA (Pill Button) ──
+  submitButton: {
+    backgroundColor: Colors.primary,
+    borderRadius: 26,
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 18,
+    marginBottom: 20,
+    shadowColor: Colors.primary,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 3,
+  },
+  submitButtonDisabled: {
+    opacity: 0.7,
+  },
+  submitButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
+
+  // ── Footer ──
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: Spacing.xl,
+    marginBottom: 12,
   },
   footerText: {
-    ...Typography.caption,
-    color: Colors.textSecondary,
     fontSize: 13,
+    color: '#9CA3AF',
   },
-  signupLink: {
-    ...Typography.caption,
-    color: Colors.primary,
-    fontWeight: '700',
+  footerLink: {
     fontSize: 13,
+    color: '#1A1A1A',
+    fontWeight: '700',
   },
 });
