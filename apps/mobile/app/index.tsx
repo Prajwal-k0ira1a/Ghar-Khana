@@ -9,7 +9,7 @@ export default function Index() {
 
   if (!isLoading) {
     if (!isAuthenticated || !user) {
-      return <Redirect href="/(auth)/login" />;
+      return <Redirect href="/splash" />;
     }
 
     return <Redirect href={user.role === 'PROVIDER' ? '/(provider)/dashboard' : '/(customer)/home'} />;
